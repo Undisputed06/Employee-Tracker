@@ -68,7 +68,7 @@ const start = () => {
   };
 
   const viewAllDepartments = () => {
-      const sql = 'SELECT * FROM department';
+      const sql = `SELECT * FROM department`;
       db.query(sql, (err, rows) =>{
         if(err){
             res.status(500).json({ error: err.message});
@@ -79,8 +79,18 @@ const start = () => {
         })
   }
 
-  const viewAllRoles= () => 
-  {}
+  const viewAllRoles= () => {
+      const sql = `SELECT role.title, role.salary, department.department_name AS department 
+      FROM role LEFT JOIN department ON role.department_id = department.id`;
+      db.query(sql, (err, rows) =>{
+        if(err){
+            res.status(500).json({ error: err.message});
+            return;
+        }
+        console.table(rows);
+        start();
+        })
+  }
 
   const viewAllEmployees= () => 
   {}
