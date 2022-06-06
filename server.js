@@ -1,4 +1,5 @@
 const express = require('express');
+const res = require('express/lib/response');
 const inquirer = require('inquirer');
 const mysql = require('mysql2')
 const db = require('./db/connection');
@@ -66,8 +67,17 @@ const start = () => {
     });
   };
 
-  const viewAllDepartments = () => 
-  {}
+  const viewAllDepartments = () => {
+      const sql = 'SELECT * FROM department';
+      db.query(sql, (err, rows) =>{
+        if(err){
+            res.status(500).json({ error: err.message});
+            return;
+        }
+        console.table(rows);
+        start();
+        })
+  }
 
   const viewAllRoles= () => 
   {}
