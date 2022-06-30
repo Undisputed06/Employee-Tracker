@@ -217,7 +217,7 @@ const start = () => {
           return;
       }
       console.log("Employee" + answers.firstName + " " + answers.lastName +  " has been added!")
-      viewAllRoles();
+      viewAllEmployees();
       start();
       })
     })
@@ -228,32 +228,26 @@ const start = () => {
   const updateEmployeeRole = () => {
     return inquirer.prompt([
       {
-        type: 'list',
+        type: 'input',
         name: 'id',
-        message: "Which employee's role would you like to change?",
-        choices: employees
+        message: "Enter the employee's ID you want to be updated?",
       },
       {
-        type: 'list',
+        type: 'input',
         name: 'role_id',
-        message: "What is this employee's new role?",
+        message: "What is the role ID of the employee?",
         choices: roles
       }
     ])
     .then(answers => {
-      const sql = `SELECT employee.*,  SET role_id = ${answers.role_id}`
-    
-      db.query(sql, (err, rows)=> {
-        if(err){
-            res.status(500).json({ error: err.message});
-            return;
-        }
+      db.query(`UPDATE employee set role_id = ? where id=?`, [answers.role_id, answers.id], (err, rows) => {
+
+        if(err) throw err;
         console.log("Employee role has been updated!")
-        viewAllRoles();
+        viewAllEmployees();
         start();
         })
       })
-
     }
 
 
