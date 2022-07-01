@@ -82,13 +82,14 @@ const start = () => {
 
   //View all Roles
   const viewAllRoles= () => {
-      const sql = `SELECT role.*, department.department_name AS department 
-      FROM role LEFT JOIN department ON role.department_id = department.id`;
+      const sql = `SELECT roles.*, department.department_name AS department 
+      FROM roles LEFT JOIN department ON roles.department_id=department.id`;
       db.query(sql, (err, rows) =>{
         if(err){
-            res.status(500).json({ error: err.message});
-            return;
-        }
+          console.log("error = "+ err)
+          res.status(500).json({ error: err.message});
+          return;
+      }
         console.table(rows);
         start();
         })
@@ -96,9 +97,9 @@ const start = () => {
 
   //View All Employees
   const viewAllEmployees= () => {
-      const sql = `SELECT employee.*,role.title
-      AS role FROM employee
-      LEFT JOIN role ON employee.role_id = role.id `
+      const sql = `SELECT employee.*,roles.title
+      AS roles FROM employee
+      LEFT JOIN roles ON employee.role_id = roles.id `
       db.query(sql, (err, rows) =>{
         if(err){
             res.status(500).json({ error: err.message});
@@ -146,11 +147,6 @@ const start = () => {
     return inquirer.prompt([
         {
             type: "input",
-            name: "roleID",
-            message: "Enter the role ID?",      
-        },
-        {
-            type: "input",
             name: "roleName",
             message: "Enter the name of the role?",      
         },
@@ -165,15 +161,32 @@ const start = () => {
             message: "Enter the department of the role?",      
         },
         ]).then(roleChoice =>{
-        const sql = `INSERT INTO role (id, title, salary, department_id) VALUES (?, ?, ?, ?)`;
-        const params = [roleChoice.roleID, roleChoice.roleName, roleChoice.roleSalary, roleChoice.roleDepartment]
+          let dept;
+          switch(roleChoice.roleDepartment){
+            case "Sales":
+              dept = 1;
+              break;
+            case "Engineering":
+              dept = 2; 
+              break;
+            case "Finance":
+              dept =3;
+              break;
+            case "Legal":
+              dept = 4;
+               break;
+          
+          }
+        const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
+        const params = [roleChoice.roleName, roleChoice.roleSalary, dept]
 
         db.query(sql, params, (err, rows)=> {
-            if(err){
-                res.status(500).json({ error: err.message});
-                return;
-            }
-            console.log("Role" + roleName + "has been added!")
+          if(err){
+            // console.log("error = "+ err)
+            res.status(500).json({ error: err.message});
+            return;
+        }
+            console.log("Role " + roleChoice.roleName + " has been added!")
             viewAllRoles();
             start();
             })
