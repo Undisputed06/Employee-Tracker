@@ -142,7 +142,6 @@ const start = () => {
                 }
                 console.log("Department " + params + " has been added!")
                 viewAllDepartments();
-                start();
                 })
             })
  }
@@ -193,7 +192,7 @@ const start = () => {
             res.status(500).json({ error: err.message});
             return;
         }
-            console.table(rows)
+            viewAllRoles();
             console.log("Role " + roleChoice.roleName + " has been added!")
             })
         })
@@ -261,7 +260,7 @@ const start = () => {
               if (error) {
                 throw error;
               }
-              console.table(results);
+              viewAllEmployees();
               start();
             }
           );
@@ -313,7 +312,7 @@ const start = () => {
               if (error) {
                 throw error;
               }
-              console.table(results)
+              viewAllEmployees();
               start();
             }
           );
