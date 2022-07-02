@@ -2,9 +2,8 @@ const express = require('express');
 const res = require('express/lib/response');
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
-const { off } = require('./db/connection');
 const db = require('./db/connection');
-const cTable = require('console.table');
+
 
 
 const PORT = process.env.PORT || 3001;
@@ -99,14 +98,19 @@ const start = () => {
 
   //View All Employees
   const viewAllEmployees= () => {
-      const sql = `SELECT employee.*,roles.title
-      AS roles FROM employee
-      LEFT JOIN roles ON employee.role_id = roles.id `
+      const sql = `SELECT employee.*,roles.title, roles.salary, department.department_name 
+      AS department
+      FROM employee
+      LEFT JOIN roles 
+      ON employee.role_id = roles.id
+      LEFT JOIN department
+      ON roles.department_id = department.id `
       db.query(sql, (err, rows) =>{
         if(err){
-            res.status(500).json({ error: err.message});
-            return;
-        }
+          console.log("error = "+ err)
+          res.status(500).json({ error: err.message});
+          return;
+      }
         console.table(rows);
         start();
         })
