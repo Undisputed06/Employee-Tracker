@@ -8,9 +8,6 @@
   ## Table of Contents
   * [Installation](#installation)
   * [Usage](#usage)
-  * [License](#license)
-  * [Contribute](#contributing)
-  * [Tests](#tests)
   * [Questions](#questions)
 
   
@@ -24,9 +21,11 @@
   ## Usage 
   
 
+   [Link to Video Demo](https://drive.google.com/file/d/1arOX4i5IgeXIHzKlxUcObBx9VVORRKhH/view)
+
   ## Questions
   [My Github Profile](https://github.com/Undisputed06)
   
-  Please feel free to contact me at email.email.com
+
 
 
