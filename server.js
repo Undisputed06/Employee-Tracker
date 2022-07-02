@@ -1,8 +1,10 @@
 const express = require('express');
 const res = require('express/lib/response');
 const inquirer = require('inquirer');
-const mysql = require('mysql2')
+const mysql = require('mysql2');
+const { off } = require('./db/connection');
 const db = require('./db/connection');
+const cTable = require('console.table');
 
 
 const PORT = process.env.PORT || 3001;
@@ -195,74 +197,126 @@ const start = () => {
 
 
   //Add an employee
-  const addEmployee= () => {
-    return inquirer.prompt([
-      {
-        type: 'input',
-        name: 'firstName',
-        message: "What is the employee's first name?"
-      },
-      {
-        type: 'input',
-        name: 'lastName',
-        message: "What is the employee's last name?"
-      },
-      {
+  const addEmployee = () => {
+    const sql = "SELECT id, title FROM roles";
+    db.query(sql, (error, results) => {
+      if (error) {
+        throw error;
+      }
+      const roleArray = results.map((role) => role.title);
+      const roleList = results;
+      const sql = "SELECT * FROM employee"
+
+
+      db.query(sql,(error, results) => {
+        if (error) {
+          throw error;
+        }
+        const managerArray = results.map(
+          (manager) => manager.first_name + " " + manager.last_name
+        );
+        const managerList = results;
         
-          type: 'input',
-          name: 'role_id',
-          message: "What is the employee's role?"
-      },
-      {
-        type: 'input',
-        name: 'manager_id',
-        message: "What is the employee's manager ID ?"
-      }
-    ])
-    .then(answers => {
-      const sql = `INSERT INTO employees(first_name, last_name, role_id, manager_id) VALUES(?, ?, ?, ?)`
-      const params = [answers.firstName, answers.lastName, answers.role_id, answers.manager_id]
-    
-    
-    db.query(sql, params, (err, rows)=> {
-      if(err){
-          res.status(500).json({ error: err.message});
-          return;
-      }
-      console.log("Employee" + answers.firstName + " " + answers.lastName +  " has been added!")
-      viewAllEmployees();
-      start();
-      })
-    })
-}
-
+        const employeeQuestions = [
+          {
+            type: "input",
+            name: "firstName",
+            message: "What is the first name of the new employee?",
+          },
+          {
+            type: "input",
+            name: "lastName",
+            message: "What is the last name of the new employee?",
+          },
+          {
+            type: "list",
+            name: "role",
+            message: "Which role will this new employee fill?",
+            choices: roleArray
+          },
+          {
+            type: "list",
+            name: "employeeManager",
+            message: "Who is the manager of the new employee?",
+            choices: managerArray
+          },
+        ];
+        inquirer.prompt(employeeQuestions).then((answer) => {
+          const role = roleList.find((roles) => roles.title === answer.role);
+          const manager = managerList.find((employeeManager) => {
+            const fullName = employeeManager.first_name + " " + employeeManager.last_name;
+            return fullName === answer.employeeManager;
+          });
+          console.log(roleList, role);
+          const sql =
+            "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+          db.query(
+            sql,
+            [answer.firstName, answer.lastName, role.id, manager.id],
+            (error, results) => {
+              if (error) {
+                throw error;
+              }
+              viewAllEmployees();
+              start();
+            }
+          );
+        });
+      });
+    });
+  }
   
-
+  //update employee role 
   const updateEmployeeRole = () => {
-    return inquirer.prompt([
-      {
-        type: 'input',
-        name: 'id',
-        message: "Enter the employee's ID you want to be updated?",
-      },
-      {
-        type: 'input',
-        name: 'role_id',
-        message: "What is the role ID of the employee?",
-        choices: roles
+    const sql= "SELECT * FROM employee";
+    db.query(sql, (error, results) => {
+      if (error) {
+        throw error;
       }
-    ])
-    .then(answers => {
-      db.query(`UPDATE employee set role_id = ? where id=?`, [answers.role_id, answers.id], (err, rows) => {
-
-        if(err) throw err;
-        console.log("Employee role has been updated!")
-        viewAllEmployees();
-        start();
-        })
-      })
-    }
-
+      const employeeList = results;
+      const employeeArray = results.map(
+        (employee) => employee.first_name + " " + employee.last_name
+      );
+      db.query("SELECT * FROM roles", (error, results) => {
+        if (error) {
+          throw error;
+        }
+        const roleArray = results.map((role) => role.title);
+        const roleList = results;
+        const changeQuestions = [
+          {
+            type: "list",
+            name: "employee",
+            message: "Which employee would you like to update?",
+            choices: employeeArray,
+          },
+          {
+            type: "list",
+            name: "role",
+            message: "Which role would you like this employee to have?",
+            choices: roleArray,
+          },
+        ];
+        inquirer.prompt(changeQuestions).then((answer) => {
+          const employeeMatch = employeeList.find((employee) => {
+            const fullName = employee.first_name + " " + employee.last_name;
+            return fullName === answer.employee;
+          });
+          const role = roleList.find((role) => role.title === answer.role);
+          db.query(
+            `UPDATE employee SET role_id=${role.id} WHERE id =${employeeMatch.id}`,
+            function (error, results) {
+              if (error) {
+                throw error;
+              }
+              viewAllEmployees();
+              start();
+            }
+          );
+        });
+      });
+    });
+  }
 
   
   start();
