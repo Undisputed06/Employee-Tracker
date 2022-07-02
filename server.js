@@ -1,7 +1,6 @@
 const express = require('express');
 const res = require('express/lib/response');
 const inquirer = require('inquirer');
-const mysql = require('mysql2');
 const db = require('./db/connection');
 
 
@@ -149,24 +148,26 @@ const start = () => {
  }
 
  //Add a role
-  const addRole= () => {
-    return inquirer.prompt([
+  const addRole = () => { 
+      const roleQuestions = [
         {
             type: "input",
             name: "roleName",
-            message: "Enter the name of the role?",      
+            message: "Enter the name of the role?"   
         },
         {
             type: "input",
             name: "roleSalary",
-            message: "Enter the salary of the role?",      
+            message: "Enter the salary of the role?"    
         },
         {
             type: "input",
             name: "roleDepartment",
-            message: "Enter the department of the role?",      
-        },
-        ]).then(roleChoice =>{
+            message: "Enter the department of the role?"    
+        }
+        ]
+        return inquirer.prompt(roleQuestions)
+        .then(roleChoice => {
           let dept;
           switch(roleChoice.roleDepartment){
             case "Sales":
@@ -181,8 +182,8 @@ const start = () => {
             case "Legal":
               dept = 4;
                break;
-          
           }
+  
         const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`;
         const params = [roleChoice.roleName, roleChoice.roleSalary, dept]
 
@@ -192,9 +193,8 @@ const start = () => {
             res.status(500).json({ error: err.message});
             return;
         }
+            console.table(rows)
             console.log("Role " + roleChoice.roleName + " has been added!")
-            viewAllRoles();
-            start();
             })
         })
   }
@@ -261,7 +261,7 @@ const start = () => {
               if (error) {
                 throw error;
               }
-              viewAllEmployees();
+              console.table(results);
               start();
             }
           );
@@ -313,7 +313,7 @@ const start = () => {
               if (error) {
                 throw error;
               }
-              viewAllEmployees();
+              console.table(results)
               start();
             }
           );

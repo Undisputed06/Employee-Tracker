@@ -19,7 +19,6 @@
   },
   "homepage": "https://github.com/Undisputed06/Employee-Tracker#readme",
   "dependencies": {
-    "console": "^0.7.2",
     "console.table": "^0.10.0",
     "express": "^4.18.1",
     "inquirer": "^8.2.4",
